@@ -57,6 +57,8 @@ static void m68k_cpu_reset(CPUState *s)
     memset(env, 0, offsetof(CPUM68KState, end_reset_fields));
 #ifdef CONFIG_SOFTMMU
     cpu_m68k_set_sr(env, SR_S | SR_I);
+    cpu->env.aregs[7] = ldl_phys(s->as, 0);
+    cpu->env.pc = ldl_phys(s->as, 4);
 #else
     cpu_m68k_set_sr(env, 0);
 #endif
@@ -65,9 +67,6 @@ static void m68k_cpu_reset(CPUState *s)
     }
     cpu_m68k_set_fpcr(env, 0);
     env->fpsr = 0;
-
-    /* TODO: We should set PC from the interrupt vector.  */
-    env->pc = 0;
 }
 
 static void m68k_cpu_disas_set_info(CPUState *s, disassemble_info *info)
@@ -231,8 +230,8 @@ static void m68k_cpu_realizefn(DeviceState *dev, Error **errp)
 
     m68k_cpu_init_gdb(cpu);
 
-    cpu_reset(cs);
     qemu_init_vcpu(cs);
+    cpu_reset(cs);
 
     mcc->parent_realize(dev, errp);
 }
