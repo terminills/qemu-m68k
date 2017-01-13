@@ -41,7 +41,7 @@
 #include "net/net.h"
 #include "qapi/error.h"
 
-#define MACROM_ADDR     0x40000000
+#define MACROM_ADDR     0x40a00000
 #define MACROM_SIZE     0x00100000
 
 /*
