@@ -36,6 +36,8 @@ static inline void do_interrupt_m68k_hardirq(CPUM68KState *env)
 
 #else
 
+extern void qemu_system_reset_request(void);
+
 /* Try to fill the TLB and return an exception if error. If retaddr is
    NULL, it means that the function was called in C code (i.e. not
    from generated code or from helper.c) */
@@ -361,6 +363,16 @@ static void m68k_interrupt_all(CPUM68KState *env, int is_hw)
 
     sp &= ~1;
     if (cs->exception_index == EXCP_ACCESS) {
+        /*
+         * horrible hack to reset macintosh Quadra 800.
+         * To reset, linux calls ROM entry point 0x4080000a
+         * as we have no ROM, this fails. We try to trap this here
+         */
+        if (env->mmu.ar == 0x4080000a &&
+            (env->mmu.ssw & M68K_TM_040_SUPER)) {
+            qemu_system_reset_request();
+            return;
+        }
         if (env->mmu.fault) {
             cpu_abort(cs, "DOUBLE MMU FAULT\n");
         }
