@@ -206,6 +206,7 @@ uint64_t mos6522_read(void *opaque, hwaddr addr, unsigned size)
     MOS6522State *s = opaque;
     uint32_t val;
 
+    addr >>= s->addr_shift;
     switch (addr) {
     case VIA_REG_B:
         val = s->b;
@@ -283,6 +284,7 @@ void mos6522_write(void *opaque, hwaddr addr, uint64_t val, unsigned size)
 
     trace_mos6522_write(addr, val);
 
+    addr >>= s->addr_shift;
     switch (addr) {
     case VIA_REG_B:
         s->b = (s->b & ~s->dirb) | (val & s->dirb);
@@ -451,7 +453,8 @@ static void mos6522_init(Object *obj)
     MOS6522State *s = MOS6522(obj);
     int i;
 
-    memory_region_init_io(&s->mem, obj, &mos6522_ops, s, "mos6522", 0x10);
+    memory_region_init_io(&s->mem, obj, &mos6522_ops, s, "mos6522",
+                          VIA_REG_SIZE << s->addr_shift);
     sysbus_init_mmio(sbd, &s->mem);
     sysbus_init_irq(sbd, &s->irq);
 
@@ -465,6 +468,7 @@ static void mos6522_init(Object *obj)
 
 static Property mos6522_properties[] = {
     DEFINE_PROP_UINT64("frequency", MOS6522State, frequency, 0),
+    DEFINE_PROP_UINT8("addr_shift", MOS6522State, addr_shift, 0),
     DEFINE_PROP_END_OF_LIST()
 };
 

@@ -71,6 +71,8 @@
 #define VIA_REG_IER     0x0e
 #define VIA_REG_ANH     0x0f
 
+#define VIA_REG_SIZE    0x10
+
 /**
  * MOS6522Timer:
  * @counter_value: counter value at load time
@@ -106,6 +108,8 @@ typedef struct MOS6522State {
     /*< public >*/
 
     MemoryRegion mem;
+    uint8_t addr_shift;
+
     /* VIA registers */
     uint8_t b;
     uint8_t a;
